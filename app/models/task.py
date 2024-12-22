@@ -1,22 +1,30 @@
-from fastapi import APIRouter
+from app.backend.db import Base
+from sqlalchemy import Column, ForeignKey, Integer, String, Boolean, Float
+from sqlalchemy.orm import relationship  # взаимосвязь
+from app.models.user import User
 
-router = APIRouter(prefix="/task", tags=["task"])
+'''
+В task.py создать модель Task, 
+наслед. от ранее написанного Base с атрибутами
+'''
 
-@router.get("/")
-async def all_tasks():
-    pass
 
-@router.get("/task_id")
-async def task_by_id():
-    pass
+class Task(Base):
+    __tablename__ = "tasks"
+    __table_args__ = {"extend_existing": True}
+    id = Column(Integer, primary_key=True, index=True)
+    title = Column(String)
+    content = Column(String)
+    priority = Column(Integer, default=0)
+    completed = Column(Boolean, default=False)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False, index=True)
+    slug = Column(String, unique=True, index=True)
 
-@router.post("/create")
-async def create_task():
-    pass
+    # relationship - показ.взаимосвязь (к кому взаимосвязь) и (куда возвращаться с ней)
+    # объект связи с табл. User
+    user = relationship("User", back_populates="tasks")
 
-@router.put("/update")
-async def update_task():
-    pass
-@router.delete("/delete")
-async def delete_task():
-    pass
+
+from sqlalchemy.schema import CreateTable
+
+print(CreateTable(Task.__table__))
